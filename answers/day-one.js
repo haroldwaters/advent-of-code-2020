@@ -1,42 +1,60 @@
-'use strict'
 const fs = require('fs')
-
-let TARGET = 2020
 
 const input = fs.readFileSync('./inputs/day-one.txt').toString()
 
 function parseInput(inputArr) {
-    return input
+    return inputArr
         .split(/\s/)
         .map(x => parseInt(x.trim()))
         .sort((a, b) => a >= b ? 1 : -1)
-        .filter(x => x <= TARGET)
 }
 
 const parsedInput = parseInput(input)
 
-function getProducts(i, target, list, split) {
+function getProducts(num, target, list, split) {
     // If I dips below zero, we've recursed too far - go back!
-    if (i < 0) return
+    if (!num) return
 
     // Get the difference between our top
-    const diff = target - list[i]
+    const diff = target - num
     if (diff > 0) {
-        const x = list.findIndex((num, j) => num > diff || j === i - 1)
+        // Find the first index _higher_ than our diff
+        const x = list.findIndex((num, j) => num > diff)
+        
+        // If we don't find our index, return
         if (!x) return
 
-        if (!split || split === 1) {
-            if (list[x - 1] === diff) return [list[i], list[x - 1]]
+        if (!split || split === 0) {
+            // If we're not doing any splits, then just return our found index minus 1 
+            // along with our highest index
+            if (list[x - 1] === diff) {
+                return [num, list[x - 1]]
+            }
         } else if (split > 0) {
-            const a = getProducts(i - 1, diff, list.slice(0, i), split - 1)
-            if (a && a.reduce((acc, num) => acc + num, 0)) return [list[i], ...a]
+            // If we still have splits to do, then 
+            const nextNum = getProducts(list[list.length - 1], diff, list.slice(0, x), split - 1)
+            if (nextNum) {
+                return [num, ...nextNum]
+            }
         }
+        // If we're at split one and num equals diff, just return num
     } else if (diff === 0 && split === 1) {
-        return [list[i]]
+        return [num]
     }
-    return getProducts(i - 1, target, list.slice(0, i), split)
+
+    // If we've reached this point, then we're going to recurse further down the list and do it
+    // all again
+    return getProducts(list[list.length - 1], target, list.slice(0,-1), split)
 }
-const result = getProducts(parsedInput.length - 1, TARGET, parsedInput, 3)
+
+
+// The number we want to sum to
+const TARGET = 2020
+
+// The amount of numbers to sum
+const SPLIT_COUNT = 3 
+
+const result = getProducts(parsedInput.pop(), TARGET, parsedInput, SPLIT_COUNT)
+
 console.log(result)
-console.assert(result.reduce((acc, num) => acc + num) === TARGET)
-console.log(result.reduce((acc, num) => acc * num))
+console.log(result && result.reduce((acc, num) => acc * num))
