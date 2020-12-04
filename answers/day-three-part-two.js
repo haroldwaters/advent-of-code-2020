@@ -28,11 +28,11 @@ function traverse(input, x, y, mvX, mvY, trees) {
         currentPosX -= input[0].length
     }
 
-    const splitInput = input[y].split('')
-    splitInput[x] = `\x1b[42m${splitInput[x]}\x1b[0m`
-    const dispArr = splitInput.join('')
+    // const splitInput = input[y].split('')
+    // splitInput[x] = `\x1b[42m${splitInput[x]}\x1b[0m`
+    // const dispArr = splitInput.join('')
 
-    console.log(dispArr)
+    // console.log(dispArr)
     return traverse(input,currentPosX, currentPosY, mvX, mvY, trees)
 }
 
@@ -45,10 +45,12 @@ const slopes = [
 ]
 
 const trees = []
+console.time()
 for (const slope of slopes) {
     console.log(slope)
     trees.push(traverse(parsedInput, 0, 0, slope[0], slope[1], 0))
 }
+console.timeEnd()
 
 console.log(trees)
 console.log(trees.reduce((acc, num) => acc * num, 1))
