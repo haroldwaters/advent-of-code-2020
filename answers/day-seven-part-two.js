@@ -28,23 +28,23 @@ function getContainedBags(rule) {
 
 function filterBagRules(bagName) {
     return function (rule) {
-        const joinedRule = rule.slice(rule.findIndex(w => w === 'bags') + 2).join(' ')
-        if (!joinedRule.includes(bagName)) return true
+        return !getRuleName(rule).includes(bagName)
     }
 }
 
-function containedBagCount(bagType, bagRuleList) {
+function getContainedBagCount(bagType, bagRuleList) {
     const bagRule = bagRuleList.find(bagRule => bagType === getRuleName(bagRule) )
     const containedBagRules = getContainedBags(bagRule)
     const filteredBagRuleList = bagRuleList.filter(filterBagRules(bagType))
     return containedBagRules
         .reduce((acc, bagRules) => {
             if (!bagRules) return 0
-            const count = containedBagCount(bagRules[1], filteredBagRuleList)
-            return acc + bagRules[0] + bagRules[0] * count
+            const bagCount = bagRules[0]
+            const containedBagCount = getContainedBagCount(bagRules[1], filteredBagRuleList)
+            return acc + bagCount + bagCount * containedBagCount
         }, 0)
 }
 
 const SHINY_GOLD = 'shiny gold'
-const count = containedBagCount(SHINY_GOLD, parsedInput)
+const count = getContainedBagCount(SHINY_GOLD, parsedInput)
 console.log(count)
