@@ -24,7 +24,6 @@ function execCommand(pos, commands, acc, test, visitedPositions) {
     visitedPositions.add(pos)
 
     // Acc if we it's our cmd
-    if(command === 'acc') acc += arg
 
     // We'll have isolated tests for 'nop' and 'jmp' by passing a false (so they don't test
     // themselves) and by passing a new Set()
@@ -37,15 +36,17 @@ function execCommand(pos, commands, acc, test, visitedPositions) {
 
         // If this is a 'jmp' command, test 'nop' first
         if (command === 'jmp') {
-            const jmpTest = execCommand(++pos, commands, acc, false, new Set())
+            const jmpTest = execCommand(pos + 1, commands, acc, false, new Set())
             if (jmpTest) return jmpTest
         }
     }
 
     // If the tests fail, execute normal flow
     if(command === 'jmp') return execCommand(pos + arg, commands, acc, test, visitedPositions)
+    if(command === 'acc') acc += arg
     return execCommand(++pos, commands, acc, test, visitedPositions)
 }
 
+// 1703
 const acc = execCommand(0, parsedInput, 0, true, new Set())
 console.log(acc)
