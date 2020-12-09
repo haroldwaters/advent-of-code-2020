@@ -1,17 +1,21 @@
 const fs = require('fs')
 
-const input = fs.readFileSync('./inputs/day-one.txt').toString()
+const input = fs.readFileSync('./inputs/day-nine.txt').toString()
 
-function parseInput(inputArr) {
-    return inputArr
-        .split(/\s/)
-        .map(x => parseInt(x.trim()))
-        .sort((a, b) => a >= b ? 1 : -1)
+function parseInput(inputStr) {
+    return inputStr
+        .split(/\n/)
+        .map(str => parseInt(str))
 }
 
 const parsedInput = parseInput(input)
 
-function getProducts(num, target, list, split) {
+function sortAsc(a, b) {
+    return a -b
+}
+
+
+function getTwoNums(num, target, list, split) {
     // If I dips below zero, we've recursed too far - go back!
     if (!num) return
 
@@ -32,7 +36,7 @@ function getProducts(num, target, list, split) {
             }
         } else if (split > 0) {
             // If we still have splits to do, then 
-            const nextNum = getProducts(list[list.length - 1], diff, list.slice(0, x), split - 1)
+            const nextNum = getTwoNums(list[list.length - 1], diff, list.slice(0, x), split - 1)
             if (nextNum) {
                 return [num, ...nextNum]
             }
@@ -44,17 +48,16 @@ function getProducts(num, target, list, split) {
 
     // If we've reached this point, then we're going to recurse further down the list and do it
     // all again
-    return getProducts(list[list.length - 1], target, list.slice(0,-1), split)
+    return getTwoNums(list[list.length - 1], target, list.slice(0,-1), split)
 }
 
+function findInvalid(nums, pos, preambleLength) {
+    const sumNums = nums.slice(pos - (preambleLength), pos).sort(sortAsc)
+    const twoNums = getTwoNums(sumNums.pop(), nums[pos], sumNums, 2)
+    if (twoNums) return findInvalid(nums, pos + 1, preambleLength)
+    return nums[pos]
+}
 
-// The number we want to sum to
-const TARGET = 2020
-
-// The amount of numbers to sum
-const SPLIT_COUNT = 3 
-
-const result = getProducts(parsedInput.pop(), TARGET, parsedInput, SPLIT_COUNT)
-
-console.log(result)
-console.log(result && result.reduce((acc, num) => acc * num))
+const PREAMBLE_LENGTH = 25
+const invalidNum = findInvalid(parsedInput, PREAMBLE_LENGTH, PREAMBLE_LENGTH)
+console.log(invalidNum)
